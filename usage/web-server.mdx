@@ -1,0 +1,96 @@
+---
+title: "Web server"
+description: "Run PhoneInfoga as a web application with a Vue.js client and REST API."
+---
+
+PhoneInfoga ships a built-in web server that exposes a Vue.js web client and a REST API. You can deploy it anywhere — locally for investigation work or on a server to share with a team.
+
+<Note>
+  The application is stateless and requires no persistent storage. There is no database to configure.
+</Note>
+
+## Start the server
+
+<Steps>
+  <Step title="Run the serve command">
+    <CodeGroup>
+
+    ```bash Native
+    phoneinfoga serve
+    ```
+
+    ```bash Docker
+    docker run --rm -it -p 5000:5000 sundowndev/phoneinfoga serve
+    ```
+
+    </CodeGroup>
+
+    The server listens on port `5000` by default. You should see:
+
+    ```text
+    Listening on :5000
+    ```
+  </Step>
+
+  <Step title="Open the web client">
+    Navigate to `http://localhost:5000` in your browser to access the web client.
+  </Step>
+</Steps>
+
+## Use a custom port
+
+<CodeGroup>
+
+```bash Native
+phoneinfoga serve -p 8080
+```
+
+```bash Docker
+docker run --rm -it -p 8080:8080 sundowndev/phoneinfoga serve -p 8080
+```
+
+</CodeGroup>
+
+Replace `8080` with any available port. The Docker `-p` flag must match the port passed to `-p` in the serve command.
+
+## REST API only
+
+Use `--no-client` to start the server without serving the Vue.js frontend. Only the REST API endpoints will be available.
+
+<CodeGroup>
+
+```bash Native
+phoneinfoga serve --no-client
+```
+
+```bash Docker
+docker run --rm -it -p 5000:5000 sundowndev/phoneinfoga serve --no-client
+```
+
+</CodeGroup>
+
+<Tip>
+  The REST API is available even when the web client is enabled. Use `--no-client` when you only need programmatic access and want to reduce the attack surface of a deployed instance.
+</Tip>
+
+## Disable specific scanners
+
+Pass one or more `-D` flags to prevent specific scanners from running on any request handled by this server instance.
+
+```bash
+phoneinfoga serve -D numverify -D googlesearch
+```
+
+## Load scanner credentials
+
+Use `--env-file` to supply API keys and credentials without setting system environment variables.
+
+```bash
+phoneinfoga serve --env-file /etc/phoneinfoga/scanners.env
+```
+
+See the [scanner pages](/scanners/overview) for the environment variables each scanner expects.
+
+## API documentation
+
+The REST API exposes endpoints for validating and scanning phone numbers. See the [API overview](/api/overview) for the full reference.

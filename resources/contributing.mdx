@@ -1,0 +1,128 @@
+---
+title: "Contributing"
+description: "Set up a local development environment and contribute to PhoneInfoga."
+---
+
+Contributions are welcome. This page covers the project structure, how to build from source, run tests, and format code. Before opening a pull request, check the [open issues](https://github.com/sundowndev/phoneinfoga/issues) to find something to work on or to report a bug.
+
+## Requirements
+
+- Node.js >= v15
+- npm or yarn
+- Go >= 1.16
+
+<Note>
+  If you use npm instead of yarn, replace `yarn <command>` with `npm run <command>` throughout this page.
+</Note>
+
+## Project structure
+
+| Directory | Purpose |
+|---|---|
+| `bin/` | Local binaries |
+| `build/` | Build package providing info about the current build |
+| `cmd/` | CLI code |
+| `docs/` | Documentation |
+| `examples/` | Code examples |
+| `lib/` | Libraries |
+| `mocks/` | Mocks |
+| `support/` | Utilities, manifests for production and local environments |
+| `test/` | Utilities for testing purposes |
+| `web/` | Web server, including REST API and web client |
+
+## Building from source
+
+<Steps>
+  <Step title="Install build tools">
+    Install the tools needed to build the project, generate mocks, and run tests.
+
+    ```bash
+    make install-tools
+    ```
+
+    This installs `gotestsum`, `mockery`, `swag`, and `golangci-lint`.
+  </Step>
+  <Step title="Build the web client">
+    Build the Vue.js web client. This creates a `dist/` directory containing the compiled static files.
+
+    ```bash
+    cd web/client && yarn && yarn build
+    ```
+  </Step>
+  <Step title="Build the project">
+    Generate in-memory assets from the `dist/` directory and compile the Go binary. The output binary is placed in `bin/phoneinfoga`.
+
+    ```bash
+    make build
+    ```
+
+    <Note>
+      If you are actively developing the web client, you must re-run this step after each client change so the updated assets are embedded in the binary.
+    </Note>
+  </Step>
+</Steps>
+
+### Run without building
+
+When iterating on Go code, you can compile and run the project directly without producing a binary:
+
+```bash
+go run main.go
+```
+
+## Testing
+
+### Go tests
+
+```bash
+# Run the full test suite
+go test -v ./...
+
+# Collect coverage data
+go test -coverprofile=coverage.out ./...
+
+# Open the coverage report in a browser
+go tool cover -html=coverage.out
+```
+
+### TypeScript tests
+
+Run these commands from the `web/client` directory.
+
+```bash
+cd web/client
+
+yarn test
+yarn test:unit
+yarn test:e2e
+```
+
+When developing the client, you can watch for file changes and rebuild automatically:
+
+```bash
+yarn build:watch
+```
+
+## Formatting
+
+### Go code
+
+PhoneInfoga uses `gofmt` to format Go files. Run formatting via the Makefile target:
+
+```bash
+make fmt
+```
+
+### TypeScript code
+
+Run these commands from the `web/client` directory.
+
+```bash
+cd web/client
+
+# Check for lint errors
+yarn lint
+
+# Automatically fix lint errors
+yarn lint:fix
+```

@@ -1,0 +1,65 @@
+---
+title: "Scanners overview"
+description: "PhoneInfoga uses scanners to gather data from different sources. Some require API keys; unconfigured scanners are automatically skipped."
+---
+
+PhoneInfoga runs a set of scanners against a given phone number to collect information from multiple data sources. Each scanner targets a different provider — some work without any credentials, others require API keys. If a scanner is not configured, it is automatically skipped during the scan.
+
+<CardGroup cols={2}>
+  <Card title="Local" icon="magnifying-glass" href="/scanners/local">
+    Statically parses the number into multiple formats and identifies the country and carrier. No configuration required.
+  </Card>
+  <Card title="Numverify" icon="circle-check" href="/scanners/numverify">
+    Validates the number and returns the carrier, line type, and location via the apilayer Number Verification API.
+  </Card>
+  <Card title="Google Search" icon="google" href="/scanners/googlesearch">
+    Generates Google Dork search URLs across social media, reputation sites, and more. No configuration required.
+  </Card>
+  <Card title="Google CSE" icon="globe" href="/scanners/googlecse">
+    Queries a Google Programmable Search Engine to programmatically find phone number footprints on the web.
+  </Card>
+  <Card title="OVH" icon="phone" href="/scanners/ovh">
+    Checks whether a European number belongs to OVH Telecom using their public REST API. No configuration required.
+  </Card>
+</CardGroup>
+
+## Configuration
+
+All scanners use environment variables for their configuration values. You can set them inline, or place them in a `.env` file in the current working directory — PhoneInfoga reads it automatically on startup.
+
+To use a different filename, pass the `--env-file` flag:
+
+```bash
+phoneinfoga scan -n +4176418xxxx --env-file=.env.local
+```
+
+**Example `.env` file:**
+
+```shell
+# .env.local
+NUMVERIFY_API_KEY="value"
+GOOGLECSE_CX="value"
+GOOGLE_API_KEY="value"
+```
+
+### Scanner options in the REST API
+
+When using the REST API, you can pass scanner configuration values on a per-request basis instead of relying on environment variables. Each scanner's options are named identically to their environment variable equivalents.
+
+<Warning>
+  Scanner options passed per-request override the corresponding environment variables for that request only.
+</Warning>
+
+## Plugin system
+
+PhoneInfoga supports custom scanner plugins written in Go. Load a plugin with the `--plugin` flag and PhoneInfoga will include it in the scan alongside the built-in scanners.
+
+```bash
+phoneinfoga scan -n +4176418xxxx --plugin ./custom_scanner.so
+```
+
+See [Custom scanners](/extend/custom-scanners) for instructions on writing and building your own plugin.
+
+## Execution model
+
+All scanners run concurrently. Each scanner first performs a dry run to check whether it is configured — if the required credentials are absent or the number is unsupported, the scanner is silently skipped. Errors encountered during a scan are collected per-scanner and do not prevent other scanners from completing.

@@ -1,0 +1,128 @@
+---
+title: "Installation"
+description: "Install PhoneInfoga on Linux, macOS, or Windows using a binary, Homebrew, or Docker."
+---
+
+PhoneInfoga supports Linux, macOS, and Windows. Choose the method that fits your environment.
+
+## Binary (recommended)
+
+<Steps>
+  <Step title="Download the latest release">
+    Run the install script from your terminal. It downloads the correct binary for your OS and architecture into the current directory.
+
+    ```bash
+    # Add --help at the end of the command for a list of install options
+    bash <( curl -sSL https://raw.githubusercontent.com/sundowndev/phoneinfoga/master/support/scripts/install )
+    ```
+
+    To verify your system is supported, check the output of `echo "$(uname -s)_$(uname -m)"` and confirm it appears on the [GitHub releases page](https://github.com/sundowndev/phoneinfoga/releases).
+
+    Alternatively, go to the [releases page](https://github.com/sundowndev/phoneinfoga/releases), choose your OS and architecture, and manually download and extract the archive.
+  </Step>
+  <Step title="Install globally">
+    Move the binary to a directory on your `PATH` so you can run it from anywhere.
+
+    ```bash
+    sudo install ./phoneinfoga /usr/local/bin/phoneinfoga
+    ```
+  </Step>
+  <Step title="Verify the installation">
+    Confirm the installed version matches the latest release.
+
+    ```bash
+    phoneinfoga version
+    ```
+  </Step>
+</Steps>
+
+## Homebrew
+
+PhoneInfoga is available as a Homebrew formula for macOS and Linux.
+
+```bash
+brew install phoneinfoga
+```
+
+## Docker
+
+<CodeGroup>
+
+```bash Docker Hub
+docker pull sundowndev/phoneinfoga:latest
+docker run --rm -it sundowndev/phoneinfoga version
+```
+
+```bash Run a scan
+docker run --rm -it sundowndev/phoneinfoga scan -n "+1 (555) 444-1212"
+```
+
+```bash Launch web server
+docker run --rm -it -p 5000:5000 sundowndev/phoneinfoga serve
+```
+
+</CodeGroup>
+
+<Info>
+  Use the `latest`, `v2`, or `stable` tags to receive only stable release updates. The `next` tag tracks the master branch and may contain unstable changes.
+</Info>
+
+### Docker Compose
+
+Use a `docker-compose.yml` file to run the web server without cloning the source code.
+
+```yaml docker-compose.yml
+version: '3.7'
+
+services:
+    phoneinfoga:
+      container_name: phoneinfoga
+      restart: on-failure
+      image: sundowndev/phoneinfoga:latest
+      command:
+        - "serve"
+      ports:
+        - "80:5000"
+```
+
+Start the service in the background:
+
+```bash
+docker-compose up -d
+```
+
+To disable the web client and run the REST API only, add the `--no-client` flag to the command:
+
+```yaml docker-compose.yml
+command:
+  - "serve"
+  - "--no-client"
+```
+
+<Tip>
+  All container output is sent to stdout. To inspect logs from a running container, run:
+
+  ```bash
+  docker logs -f <container-id|container-name>
+  ```
+</Tip>
+
+## Build from source
+
+Clone the repository and build the Docker images yourself.
+
+```bash
+docker-compose build
+```
+
+Run the CLI:
+
+```bash
+docker-compose run --rm phoneinfoga --help
+```
+
+Run the web server:
+
+```bash
+docker-compose up -d
+```

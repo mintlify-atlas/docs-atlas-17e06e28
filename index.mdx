@@ -1,97 +1,62 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "PhoneInfoga"
+description: "An advanced information gathering framework for scanning and investigating international phone numbers using OSINT techniques."
 ---
 
-## Setting up
+PhoneInfoga is one of the most advanced tools for scanning international phone numbers. It gathers basic information such as country, area, carrier, and line type, then uses multiple scanners to search for the VoIP provider, owner identity, reputation reports, and social media footprints.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install PhoneInfoga via binary, Homebrew, or Docker in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Run your first phone number scan with a single command.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Scanners" icon="magnifying-glass" href="/scanners/overview">
+    Learn about the built-in scanners and how to configure them.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="REST API" icon="code" href="/api/overview">
+    Use the REST API to integrate PhoneInfoga into your own tools.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What PhoneInfoga does
 
-Everything you need to create world-class documentation.
+<Steps>
+  <Step title="Parse the phone number">
+    PhoneInfoga validates and normalizes the input number into E.164, international, and local formats, identifying the country and carrier.
+  </Step>
+  <Step title="Run configured scanners">
+    Each enabled scanner queries a different data source — Numverify, Google Search, Google CSE, OVH — and returns results concurrently.
+  </Step>
+  <Step title="Review the results">
+    Results are printed to the terminal or returned as JSON via the REST API, ready for deeper manual analysis.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Key features
 
-## Need inspiration?
+<CardGroup cols={2}>
+  <Card title="Multiple scanners" icon="layer-group" href="/scanners/overview">
+    Local, Numverify, Google Search, Google CSE, and OVH scanners out of the box.
+  </Card>
+  <Card title="OSINT footprinting" icon="binoculars" href="/scanners/googlesearch">
+    Google Dorks to search social media, reputation databases, and disposable number services.
+  </Card>
+  <Card title="Web UI & REST API" icon="browser" href="/usage/web-server">
+    Launch a web server with a Vue.js client and full REST API for browser-based scanning.
+  </Card>
+  <Card title="Custom scanner plugins" icon="puzzle-piece" href="/extend/custom-scanners">
+    Build and load your own Go scanner plugins to extend PhoneInfoga's capabilities.
+  </Card>
+  <Card title="Go module" icon="golang" href="/extend/go-module">
+    Use PhoneInfoga as a Go library directly in your own applications.
+  </Card>
+  <Card title="Docker support" icon="docker" href="/installation">
+    Run PhoneInfoga in a container with a single Docker command.
+  </Card>
+</CardGroup>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Note>
+  PhoneInfoga is stable but unmaintained. It does not track phone locations, hack devices, or guarantee verified data. Use it as an OSINT investigation aid.
+</Note>

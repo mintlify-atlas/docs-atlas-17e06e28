@@ -1,0 +1,68 @@
+---
+title: "Google CSE scanner"
+description: "Queries a Google Programmable Search Engine to programmatically find phone number footprints on the web."
+---
+
+The Google CSE scanner uses the [Google Custom Search JSON API](https://developers.google.com/custom-search/v1/overview) to programmatically search for phone number footprints across the entire web. Unlike the [Google Search scanner](/scanners/googlesearch), this scanner fetches real results automatically — no manual browser steps required.
+
+## Pricing
+
+The Custom Search JSON API provides **100 search queries per day for free** (approximately 50 scans). Additional requests cost **$5 per 1,000 queries** (~500 scans), up to 10,000 queries per day (~5,000 scans).
+
+<Info>
+  Each scan runs two dork queries by default. Each 10 results within a query requires one additional API request. Setting `GOOGLECSE_MAX_RESULTS` above 10 increases the number of requests made per scan.
+</Info>
+
+## Configuration
+
+| Environment variable | Default | Description |
+|---------------------|---------|-------------|
+| `GOOGLECSE_CX` | (required) | The Search Engine ID of your Google Programmable Search Engine. |
+| `GOOGLE_API_KEY` | (required) | API key used to authenticate requests to the Google Custom Search API. |
+| `GOOGLECSE_MAX_RESULTS` | `10` | Maximum number of results to return per query. Each 10 results requires one additional API request. Cannot exceed `100`. |
+
+## Setup
+
+<Steps>
+  <Step title="Enable the Custom Search API">
+    Go to the [GCP console](https://console.cloud.google.com/apis/api/customsearch.googleapis.com/metrics) and enable the **Custom Search API** for your project.
+  </Step>
+  <Step title="Create an API key">
+    Go to the [credentials page](https://console.cloud.google.com/apis/credentials) and create a new API key. You can restrict this key to the **Custom Search API** only.
+  </Step>
+  <Step title="Create a Programmable Search Engine">
+    Go to [programmablesearchengine.google.com](https://programmablesearchengine.google.com/controlpanel/all) and click **Add** to create a new search engine. When filling the form, make sure to select **Search the entire web**.
+  </Step>
+  <Step title="Copy the Search Engine ID">
+    After creating the engine, copy the **Search Engine ID** (also called `cx`) from the control panel.
+  </Step>
+  <Step title="Set the environment variables">
+    Add both values to your `.env` file or export them directly:
+
+    ```shell
+    GOOGLECSE_CX="your_search_engine_id"
+    GOOGLE_API_KEY="your_api_key"
+    ```
+  </Step>
+</Steps>
+
+## How to run
+
+```bash
+GOOGLECSE_CX=<cx> GOOGLE_API_KEY=<key> phoneinfoga scan -n +1241325xxxx
+```
+
+## Output example
+
+```shell
+Results for googlecse
+Homepage: https://cse.google.com/cse?cx=<redacted>
+Result count: 1
+Items:
+    Title: Info about +1241325xxxx
+    URL: https://example.com/1241325xxxx
+```
+
+<Warning>
+  If you exceed your daily quota, the scanner returns a rate limit error. Upgrade your billing in the Google API Console to increase your limit.
+</Warning>

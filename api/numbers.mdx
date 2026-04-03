@@ -1,0 +1,81 @@
+---
+title: "Numbers"
+description: "Parse and validate a phone number using the PhoneInfoga REST API."
+---
+
+## Parse a phone number
+
+Parses a phone number and returns structured data including E.164 format, country, carrier, and validity.
+
+```
+POST /api/v2/numbers
+```
+
+### Request body
+
+<ParamField body="number" type="string" required>
+  The phone number to parse. Accepts E.164 format (e.g. `+41764183XXX`) or international format (e.g. `+41 76 418 3XXX`). Special characters and spaces are handled automatically.
+</ParamField>
+
+### Response body
+
+<ResponseField name="valid" type="boolean">
+  Whether the phone number is valid and possible.
+</ResponseField>
+
+<ResponseField name="rawLocal" type="string">
+  The local number with all non-digit characters stripped (e.g. `0764183XXX`).
+</ResponseField>
+
+<ResponseField name="local" type="string">
+  The national format of the number including spaces and formatting (e.g. `076 418 3XXX`).
+</ResponseField>
+
+<ResponseField name="e164" type="string">
+  The number in E.164 format (e.g. `+41764183XXX`).
+</ResponseField>
+
+<ResponseField name="international" type="string">
+  The E.164 number with the leading `+` stripped (e.g. `41764183XXX`).
+</ResponseField>
+
+<ResponseField name="countryCode" type="int32">
+  The numeric country calling code (e.g. `41` for Switzerland, `1` for the US).
+</ResponseField>
+
+<ResponseField name="country" type="string">
+  The ISO 3166-1 alpha-2 country code (e.g. `CH`, `FR`, `US`).
+</ResponseField>
+
+<ResponseField name="carrier" type="string">
+  The detected carrier name, if available.
+</ResponseField>
+
+### Error responses
+
+| Status | Body | Description |
+|--------|------|-------------|
+| `400` | `{"error": "Invalid phone number: please provide an integer without any special chars"}` | Request body is malformed or the `number` field is missing |
+| `400` | `{"error": "..."}` | The number could not be parsed |
+| `500` | `{"error": "Unknown error"}` | Internal server error |
+
+### Example
+
+```bash
+curl -X POST http://localhost:5000/api/v2/numbers \
+  -H "Content-Type: application/json" \
+  -d '{"number": "+4176418xxxx"}'
+```
+
+```json
+{
+  "valid": true,
+  "rawLocal": "0764180000",
+  "local": "076 418 00 00",
+  "e164": "+41764180000",
+  "international": "41764180000",
+  "countryCode": 41,
+  "country": "CH",
+  "carrier": ""
+}
+```

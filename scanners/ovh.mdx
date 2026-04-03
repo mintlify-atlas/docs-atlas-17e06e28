@@ -1,0 +1,45 @@
+---
+title: "OVH scanner"
+description: "Checks whether a European phone number is owned by OVH Telecom using their public REST API. No API key required."
+---
+
+OVH is a web hosting and cloud company that also operates as a telecom provider, offering VoIP numbers across Europe. The OVH scanner uses their public, API-key-free REST API to check whether a given number belongs to OVH Telecom.
+
+This scanner is particularly useful for identifying VoIP numbers that may be used by bots, spammers, or services avoiding traditional carrier tracking.
+
+<Note>
+  No configuration is required for this scanner. It uses OVH's public REST API with no authentication.
+</Note>
+
+## Supported countries
+
+The OVH scanner only works for European numbers. The supported country codes are:
+
+| Country code | Country |
+|-------------|---------|
+| `+33` | France |
+| `+32` | Belgium |
+| `+44` | United Kingdom |
+| `+34` | Spain |
+| `+41` | Switzerland |
+
+Numbers from other countries are automatically skipped during the dry run phase.
+
+## How to run
+
+```bash
+phoneinfoga scan -n +3336517xxxx
+```
+
+## Output example
+
+```shell
+Results for ovh
+Found: true
+Number range: 036517xxxx
+City: Abbeville
+```
+
+<Info>
+  If the number is not in OVH's VoIP range, `Found` will be `false` and no additional details will be returned.
+</Info>

@@ -1,24 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "PhoneInfoga",
+  "projectType": "cli-tool",
+  "projectName": "PhoneInfoga",
+  "projectDescription": "An advanced OSINT framework for scanning and gathering information on international phone numbers using multiple configurable scanners.",
   "theme": "aspen",
-  "colors": {
-    "primary": "#7c7c7c",
-    "light": "#0a0a0a",
-    "dark": "#c4c4c4"
-  },
-  "favicon": "https://media.brand.dev/f8039029-0dde-4432-b6db-3a12d6f74690.png",
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/sundowndev/phoneinfoga"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/sundowndev/phoneinfoga"
-    }
-  },
+  "primaryColor": "#7c7c7c",
+  "lightColor": "#0a0a0a",
+  "darkColor": "#c4c4c4",
   "navigation": {
     "tabs": [
       {
@@ -81,5 +68,30 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Scan international phone numbers using E.164 and international formats",
+    "Multiple built-in scanners: Local, Numverify, Google Search, Google CSE, OVH",
+    "OSINT footprinting via Google Dorks for social media, reputation, and disposable number detection",
+    "REST API and Vue.js web client for browser-based scanning",
+    "Plugin system for building custom scanners in Go",
+    "Usable as a Go module for programmatic integration",
+    "Docker and Homebrew installation support",
+    "Environment-variable-based configuration with .env file support"
+  ],
+  "publicApiSurface": [
+    "phoneinfoga scan -n <number>",
+    "phoneinfoga serve",
+    "phoneinfoga scanners",
+    "phoneinfoga version",
+    "POST /v2/numbers",
+    "GET /v2/scanners",
+    "POST /v2/scanners/{scanner}/run",
+    "POST /v2/scanners/{scanner}/dryrun",
+    "remote.Scanner interface (Name, Description, DryRun, Run)",
+    "remote.RegisterPlugin(Scanner)",
+    "remote.NewLibrary(filter.Filter)",
+    "number.NewNumber(string)",
+    "number.IsValid(string)"
+  ]
 }

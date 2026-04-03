@@ -1,0 +1,62 @@
+---
+title: "Numverify scanner"
+description: "Validates a phone number and returns the carrier, line type, and location using the apilayer Number Verification API."
+---
+
+The Numverify scanner provides standard but useful information such as country code, location, line type (mobile, landline, or VoIP), and carrier name. It uses the [apilayer Number Verification API](https://apilayer.com/marketplace/number_verification-api).
+
+<Note>
+  Despite the scanner's name, the API key comes from [apilayer.com](https://apilayer.com), not numverify.com directly.
+</Note>
+
+## Configuration
+
+| Environment variable | Default | Description |
+|---------------------|---------|-------------|
+| `NUMVERIFY_API_KEY` | (required) | API key from apilayer used to authenticate requests to the Number Verification API. |
+
+## Setup
+
+<Steps>
+  <Step title="Create an apilayer account">
+    Go to [apilayer.com](https://apilayer.com/) and sign up for a free account.
+  </Step>
+  <Step title="Subscribe to the Number Verification API">
+    Navigate to the **Number Verification API** in the marketplace and click **Subscribe for free**. Choose the plan that suits your usage.
+  </Step>
+  <Step title="Copy your API token">
+    After subscribing, copy the generated API token from your account dashboard.
+  </Step>
+  <Step title="Set the environment variable">
+    Export the token as `NUMVERIFY_API_KEY` or add it to your `.env` file:
+
+    ```shell
+    NUMVERIFY_API_KEY="your_api_key_here"
+    ```
+  </Step>
+</Steps>
+
+## How to run
+
+```bash
+NUMVERIFY_API_KEY=<key> phoneinfoga scan -n +4176418xxxx
+```
+
+## Output example
+
+```shell
+Results for numverify
+Valid: true
+Number: 4176418xxxx
+Local format: 076418xxxx
+International format: +4176418xxxx
+Country prefix: +41
+Country code: CH
+Country name: Switzerland (Confederation of)
+Carrier: Sunrise Communications AG
+Line type: mobile
+```
+
+<Tip>
+  The free tier includes a monthly quota of requests. If you exceed it, the scanner will return an error until the quota resets.
+</Tip>

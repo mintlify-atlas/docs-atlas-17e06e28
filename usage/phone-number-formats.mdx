@@ -1,0 +1,101 @@
+---
+title: "Phone number formats"
+description: "Accepted input formats, E.164 anatomy, and custom formatting for OSINT footprinting."
+---
+
+PhoneInfoga validates and normalizes phone numbers before running any scanners. Understanding which formats are accepted — and why custom formats matter for footprinting — helps you get better results.
+
+## Accepted formats
+
+PhoneInfoga accepts two input formats:
+
+| Format | Example | Accepted |
+|---|---|---|
+| E.164 | `+33963601234` | Yes |
+| International | `+33 9 63 60 12 34` | Yes |
+| National | `09 63 60 12 34` | No |
+| RFC3966 | `tel:+33-9-63-60-12-34` | No |
+| Out-of-country (US) | `011 33 9 63 60 12 34` | No |
+
+<Note>
+  The country code is required in every input. If you are unsure of the country code for a number, look it up at [countrycode.org](https://www.countrycode.org).
+</Note>
+
+Special characters `( ) - +` in the input are escaped automatically, so you can type US-style numbers without reformatting them:
+
+```bash
+phoneinfoga scan -n "+1 (555) 444-3333"
+phoneinfoga scan -n "+1 555-444-3333"
+```
+
+## E.164 anatomy
+
+E.164 is the international standard for phone number formatting. Every E.164 number has four parts:
+
+```
++  1  415  5552671
+^  ^  ^^^  ^^^^^^^
+|  |   |      |
+|  |   |      Local phone number
+|  |   Area code
+|  Country calling code
+Plus sign
+```
+
+| Part | Description |
+|---|---|
+| `+` | Mandatory leading plus sign |
+| Country code | ITU-assigned country calling code (1–3 digits) |
+| Area code | Regional or network prefix |
+| Local number | Subscriber number |
+
+Some countries require a leading `0` for local dialing. That `0` is dropped in E.164. For example, the UK number `020 7183 8750` becomes `+442071838750` in E.164.
+
+## Custom formatting for footprinting
+
+When searching for a phone number online, the same number can appear in many different formats depending on how the person who shared it formatted it. Searching for `+15417543010` will not return web pages that write it as `(541) 754–3010`.
+
+To maximise footprinting coverage, search using the formats that people in that country typically use when sharing numbers online. In the US, `543-456-1234` is common. In France, numbers are often written as `06 20 30 40 50` or `06.20.30.40.50`.
+
+### US-based custom formats
+
+| Example format |
+|---|
+| `+1 618-555-xxxx` |
+| `(+1)618-555-xxxx` |
+| `+1/618-555-xxxx` |
+| `(618) 555xxxx` |
+| `(618) 555-xxxx` |
+| `(618) 555.xxxx` |
+| `(618)555xxxx` |
+| `(618)555-xxxx` |
+| `(618)555.xxxx` |
+
+### European custom formats (France as example)
+
+| Example format |
+|---|
+| `+3301 86 48 xx xx` |
+| `+33018648xxxx` |
+| `+33018 648 xxx x` |
+| `(0033)018648xxxx` |
+| `(+33)018 648 xxx x` |
+| `+33/018648xxxx` |
+| `(0033)018 648 xxx x` |
+| `+33018-648-xxx-x` |
+| `(+33)018648xxxx` |
+| `(+33)01 86 48 xx xx` |
+| `+33/018-648-xxx-x` |
+| `+33/01-86-48-xx-xx` |
+| `+3301-86-48-xx-xx` |
+| `(0033)01 86 48 xx xx` |
+| `+33/01 86 48 xx xx` |
+| `(+33)018-648-xxx-x` |
+| `(+33)01-86-48-xx-xx` |
+| `(0033)01-86-48-xx-xx` |
+| `(0033)018-648-xxx-x` |
+| `+33/018 648 xxx x` |
+
+<Tip>
+  Use the [Google CSE scanner](/scanners/googlecse) with a custom search query to search for several of these formats at once and surface results across social media and public directories.
+</Tip>

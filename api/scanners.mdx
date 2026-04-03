@@ -1,0 +1,197 @@
+---
+title: "Scanners"
+description: "List available scanners and run them against a phone number using the PhoneInfoga REST API."
+---
+
+## List all scanners
+
+Returns the name and description of every scanner currently loaded by the server, including any plugins.
+
+```
+GET /api/v2/scanners
+```
+
+### Response body
+
+<ResponseField name="scanners" type="object[]">
+  Array of scanner objects.
+
+  <Expandable title="properties">
+    <ResponseField name="name" type="string">
+      The scanner's unique identifier. Use this value as the `{scanner}` path parameter in the dryrun and run endpoints.
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      A short description of what the scanner does.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example
+
+```bash
+curl http://localhost:5000/api/v2/scanners
+```
+
+```json
+{
+  "scanners": [
+    {
+      "name": "local",
+      "description": "Retrieve local data from the phone number"
+    },
+    {
+      "name": "numverify",
+      "description": "Verify phone number using Numverify API"
+    },
+    {
+      "name": "googlesearch",
+      "description": "Search phone number on Google"
+    },
+    {
+      "name": "googlecse",
+      "description": "Search phone number with Google Custom Search Engine"
+    },
+    {
+      "name": "ovh",
+      "description": "Lookup phone number using OVH's API"
+    }
+  ]
+}
+```
+
+---
+
+## Dry run a scanner
+
+Checks whether a scanner would run for the given number without performing an actual scan. Use this to verify that a scanner is properly configured and that the number is supported before committing to a full run.
+
+```
+POST /api/v2/scanners/{scanner}/dryrun
+```
+
+### Path parameters
+
+<ParamField path="scanner" type="string" required>
+  The scanner name to dry run (e.g. `numverify`, `googlecse`). Use the [list endpoint](#list-all-scanners) to get valid names.
+</ParamField>
+
+### Request body
+
+<ParamField body="number" type="string" required>
+  The phone number to test against the scanner, in E.164 or international format.
+</ParamField>
+
+<ParamField body="options" type="object">
+  Optional scanner-specific configuration values for this request. Keys are named identically to the scanner's environment variables (e.g., `NUMVERIFY_API_KEY`, `GOOGLECSE_CX`). These values override environment variables for this request only.
+</ParamField>
+
+### Response body
+
+<ResponseField name="success" type="boolean">
+  `true` if the scanner would run; `false` if it would be skipped.
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  The reason the scanner would be skipped. Present only when `success` is `false`.
+</ResponseField>
+
+### Error responses
+
+| Status | Body | Description |
+|--------|------|-------------|
+| `400` | `{"error": "..."}` | Missing or invalid `number` field |
+| `404` | `{"error": "Scanner not found"}` | The `{scanner}` path parameter does not match a loaded scanner |
+
+### Example
+
+```bash
+curl -X POST http://localhost:5000/api/v2/scanners/numverify/dryrun \
+  -H "Content-Type: application/json" \
+  -d '{
+    "number": "+4176418xxxx",
+    "options": {
+      "NUMVERIFY_API_KEY": "your_api_key_here"
+    }
+  }'
+```
+
+```json
+{
+  "success": true
+}
+```
+
+If the scanner is not configured:
+
+```json
+{
+  "success": false,
+  "error": "NUMVERIFY_API_KEY is not set"
+}
+```
+
+---
+
+## Run a scanner
+
+Runs a single scanner against the given phone number and returns the scanner's result.
+
+```
+POST /api/v2/scanners/{scanner}/run
+```
+
+### Path parameters
+
+<ParamField path="scanner" type="string" required>
+  The scanner name to run (e.g. `local`, `numverify`, `googlesearch`). Use the [list endpoint](#list-all-scanners) to get valid names.
+</ParamField>
+
+### Request body
+
+<ParamField body="number" type="string" required>
+  The phone number to scan, in E.164 or international format.
+</ParamField>
+
+<ParamField body="options" type="object">
+  Optional scanner-specific configuration values for this request. Keys are named identically to the scanner's environment variables (e.g., `NUMVERIFY_API_KEY`, `GOOGLECSE_CX`). These values override environment variables for this request only.
+</ParamField>
+
+### Response body
+
+<ResponseField name="result" type="object">
+  The scanner's output. The shape varies by scanner — refer to the individual [scanner pages](/scanners/overview) for details on each scanner's result format.
+</ResponseField>
+
+### Error responses
+
+| Status | Body | Description |
+|--------|------|-------------|
+| `400` | `{"error": "..."}` | Missing or invalid `number` field |
+| `404` | `{"error": "Scanner not found"}` | The `{scanner}` path parameter does not match a loaded scanner |
+| `500` | `{"error": "..."}` | The scanner encountered an error during execution |
+
+### Example
+
+```bash
+curl -X POST http://localhost:5000/api/v2/scanners/local/run \
+  -H "Content-Type: application/json" \
+  -d '{"number": "+4176418xxxx"}'
+```
+
+```json
+{
+  "result": {
+    "raw_local": "0764180000",
+    "local": "076 418 00 00",
+    "e164": "+41764180000",
+    "international": "41764180000",
+    "country_code": 41,
+    "country": "CH",
+    "carrier": ""
+  }
+}
+```
+
+<Warning>
+  Scanner `options` passed in the request body override the corresponding environment variables for that request only. They do not persist or affect other requests.
+</Warning>

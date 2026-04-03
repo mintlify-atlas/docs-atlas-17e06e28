@@ -1,0 +1,147 @@
+---
+title: "CLI reference"
+description: "Complete reference for all PhoneInfoga commands and flags."
+---
+
+PhoneInfoga is invoked from the command line as `phoneinfoga`. All commands follow the pattern:
+
+```bash
+phoneinfoga [command] [flags]
+```
+
+## Commands
+
+### scan
+
+Scan a phone number using all configured scanners.
+
+```bash
+phoneinfoga scan -n <number> [flags]
+```
+
+**Flags**
+
+| Flag | Short | Type | Default | Description |
+|---|---|---|---|---|
+| `--number` | `-n` | string | — | Phone number to scan (E.164 or international format). Required. |
+| `--disable` | `-D` | string[] | `[]` | Scanner name to skip for this scan. Repeatable. |
+| `--plugin` | — | string[] | `[]` | Path to an extra scanner plugin to load. Repeatable. |
+| `--env-file` | — | string[] | `[]` | Env files to load environment variables from. Looks for `.env` by default. Repeatable. |
+
+**Examples**
+
+```bash
+# Scan with E.164 format
+phoneinfoga scan -n "+33963601234"
+
+# Scan with international format
+phoneinfoga scan -n "+33 9 63 60 12 34"
+
+# Scan a US number — special characters are escaped automatically
+phoneinfoga scan -n "+1 (555) 444-3333"
+
+# Disable a specific scanner
+phoneinfoga scan -n "+33963601234" -D numverify
+
+# Disable multiple scanners
+phoneinfoga scan -n "+33963601234" -D numverify -D googlesearch
+
+# Load a custom scanner plugin
+phoneinfoga scan -n "+33963601234" --plugin ./myplugin.so
+
+# Load scanner credentials from a custom env file
+phoneinfoga scan -n "+33963601234" --env-file /etc/phoneinfoga/scanners.env
+```
+
+<Tip>
+  Use `--env-file` to point PhoneInfoga at a file containing your scanner API keys and credentials, rather than relying on shell environment variables. You can pass multiple `--env-file` flags and they are merged in order.
+</Tip>
+
+---
+
+### serve
+
+Start the web server, which hosts the Vue.js web client and the REST API.
+
+```bash
+phoneinfoga serve [flags]
+```
+
+**Flags**
+
+| Flag | Short | Type | Default | Description |
+|---|---|---|---|---|
+| `--port` | `-p` | int | `5000` | HTTP port to listen on. |
+| `--no-client` | — | bool | `false` | Disable the web client and serve the REST API only. |
+| `--disable` | `-D` | string[] | `[]` | Scanner name to skip for all scans. Repeatable. |
+| `--plugin` | — | string[] | `[]` | Path to an extra scanner plugin to load. Repeatable. |
+| `--env-file` | — | string[] | `[]` | Env files to load environment variables from. Looks for `.env` by default. Repeatable. |
+
+**Examples**
+
+```bash
+# Start on the default port (5000)
+phoneinfoga serve
+
+# Start on a custom port
+phoneinfoga serve -p 8080
+
+# REST API only — no web client
+phoneinfoga serve --no-client
+
+# Disable a scanner for all requests
+phoneinfoga serve -D numverify
+
+# Load credentials from an env file
+phoneinfoga serve --env-file /etc/phoneinfoga/scanners.env
+```
+
+<Tip>
+  Passing `--env-file` to `serve` applies scanner configuration to every request handled by the server, so you don't need to configure environment variables at the system level.
+</Tip>
+
+---
+
+### scanners
+
+List all scanners currently loaded, including any plugins.
+
+```bash
+phoneinfoga scanners [flags]
+```
+
+**Flags**
+
+| Flag | Short | Type | Default | Description |
+|---|---|---|---|---|
+| `--plugin` | — | string[] | `[]` | Path to an extra scanner plugin to include in the listing. Repeatable. |
+
+**Examples**
+
+```bash
+# List built-in scanners
+phoneinfoga scanners
+
+# List built-in and plugin scanners
+phoneinfoga scanners --plugin ./myplugin.so
+```
+
+Each scanner is printed with its name and a short description. Use this command to confirm which scanners are available before running a scan or disabling one with `-D`.
+
+---
+
+### version
+
+Print the current version of PhoneInfoga and exit.
+
+```bash
+phoneinfoga version
+```
+
+**Example output**
+
+```text
+PhoneInfoga v2.11.0
+```
+
+No flags are accepted by this command.

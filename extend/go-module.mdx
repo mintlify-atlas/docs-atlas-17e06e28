@@ -1,0 +1,149 @@
+---
+title: "Go module usage"
+description: "Use PhoneInfoga as a Go library to parse phone numbers and run scanners programmatically in your own applications."
+keywords: ["go module", "go library", "sdk", "programmatic", "api"]
+---
+
+PhoneInfoga is available as a Go module. You can import it directly into your application to parse phone numbers, validate them, and run any of the built-in scanners without the CLI.
+
+Full Go package documentation is available at [pkg.go.dev/github.com/sundowndev/phoneinfoga/v2](https://pkg.go.dev/github.com/sundowndev/phoneinfoga/v2).
+
+## Install
+
+```bash
+go get -v github.com/sundowndev/phoneinfoga/v2
+```
+
+## Core packages
+
+| Package | Purpose |
+|---|---|
+| `github.com/sundowndev/phoneinfoga/v2/lib/number` | Parse and validate phone numbers |
+| `github.com/sundowndev/phoneinfoga/v2/lib/remote` | Scanners and the scanner library |
+
+## Key types and functions
+
+### number package
+
+**`number.IsValid(input string) bool`**
+
+Returns `true` if the input string looks like a valid phone number (digits only, after stripping non-digit characters). Use this as a quick pre-check before calling `NewNumber`.
+
+**`number.NewNumber(input string) (*Number, error)`**
+
+Parses a raw phone number string and returns a `*Number` with the following fields populated:
+
+```go
+type Number struct {
+    Valid         bool
+    RawLocal      string
+    Local         string
+    E164          string
+    International string
+    CountryCode   int32
+    Country       string
+    Carrier       string
+}
+```
+
+### remote package
+
+**`remote.NewLibrary(filter Filter) *Library`**
+
+Creates a new scanner library. Pass a filter to exclude specific scanners by name, or use an empty filter to include all of them.
+
+**`remote.InitScanners(lib *Library)`**
+
+Registers all built-in scanners (Local, Numverify, Google Search, Google CSE, OVH) into the library and loads any registered plugins.
+
+**`remote.NewGoogleSearchScanner()`**
+
+Instantiates the Google Search scanner directly, without going through the library. Useful when you only need a single scanner.
+
+**`Library.Scan(n *number.Number, opts ScannerOptions) (map[string]interface{}, map[string]error)`**
+
+Runs all registered scanners concurrently against the given number. Returns a map of results keyed by scanner name, and a map of errors for any scanner that failed.
+
+## Usage example
+
+The following example parses a phone number and runs the Google Search scanner against it:
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/sundowndev/phoneinfoga/v2/lib/number"
+    "github.com/sundowndev/phoneinfoga/v2/lib/remote"
+)
+
+func main() {
+    n, err := number.NewNumber("...")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    result, err := remote.NewGoogleSearchScanner().Run(*n, remote.ScannerOptions{})
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    links := result.(remote.GoogleSearchResponse)
+    for _, link := range links.Individuals {
+        fmt.Println(link.URL)
+    }
+}
+```
+
+## Running all built-in scanners
+
+To run every built-in scanner in one call, create a library, initialize the scanners, and call `Scan`:
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/sundowndev/phoneinfoga/v2/lib/filter"
+    "github.com/sundowndev/phoneinfoga/v2/lib/number"
+    "github.com/sundowndev/phoneinfoga/v2/lib/remote"
+)
+
+func main() {
+    n, err := number.NewNumber("+14155552671")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    lib := remote.NewLibrary(filter.NewEngine())
+    remote.InitScanners(lib)
+
+    results, errs := lib.Scan(n, remote.ScannerOptions{})
+
+    for name, result := range results {
+        fmt.Printf("[%s] %+v\n", name, result)
+    }
+
+    for name, err := range errs {
+        fmt.Printf("[%s] error: %v\n", name, err)
+    }
+}
+```
+
+<Note>
+Scanners that require API keys (Numverify, Google CSE) will return errors if the corresponding environment variables are not set. Use `DryRun` behavior or check errors in the returned error map.
+</Note>
+
+<Note>
+The `remote.NewGoogleSearchScanner().Run(*n, remote.ScannerOptions{})` pattern calls the scanner directly without a library. Use `Library.Scan` for a consistent interface that runs all registered scanners concurrently.
+</Note>
+
+## Further reading
+
+- [Custom scanner plugins](/extend/custom-scanners) — build a Go plugin to add your own scanner
+- [Scanners overview](/scanners/overview) — learn what each built-in scanner does
+- [pkg.go.dev reference](https://pkg.go.dev/github.com/sundowndev/phoneinfoga/v2) — full API documentation

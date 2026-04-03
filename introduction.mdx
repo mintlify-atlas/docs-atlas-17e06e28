@@ -1,0 +1,42 @@
+---
+title: "Introduction"
+description: "PhoneInfoga is an advanced OSINT framework for scanning and investigating international phone numbers — gathering carrier, line type, and owner footprint data using a collection of configurable scanners."
+---
+
+PhoneInfoga is one of the most advanced tools for scanning international phone numbers. It first gathers basic information such as country, area, carrier, and line type, then uses multiple techniques to search for the VoIP provider or identify the owner's digital footprint. It works with a collection of scanners that must be configured for the tool to be effective.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install PhoneInfoga via binary, Homebrew, or Docker in minutes.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Run your first phone number scan with a single command.
+  </Card>
+  <Card title="Scanners" icon="magnifying-glass" href="/scanners/overview">
+    Learn about the built-in scanners and how to configure them for deeper results.
+  </Card>
+  <Card title="Web server" icon="browser" href="/usage/web-server">
+    Launch a web UI and REST API to run scans from the browser.
+  </Card>
+  <Card title="Custom scanners" icon="puzzle-piece" href="/extend/custom-scanners">
+    Build and load your own Go scanner plugins to extend PhoneInfoga.
+  </Card>
+  <Card title="Go module" icon="golang" href="/extend/go-module">
+    Use PhoneInfoga as a Go library directly in your own applications.
+  </Card>
+</CardGroup>
+
+## What PhoneInfoga does NOT do
+
+PhoneInfoga is an OSINT investigation aid, not a surveillance or exploitation tool. It has hard limits by design:
+
+- **No real-time tracking** — it cannot track a phone or its owner in real time
+- **No precise location** — it cannot retrieve a device's GPS or network location
+- **No hacking** — it does not interact with or compromise any device
+- **No guaranteed accuracy** — data comes from third-party sources and is not verified
+
+<Note>
+  PhoneInfoga is stable but unmaintained. Upcoming bugs will not be fixed and the repository could be archived at any time. Use a pinned release in production environments.
+</Note>

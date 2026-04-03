@@ -1,0 +1,44 @@
+---
+title: "Local scanner"
+description: "Statically parses a phone number into multiple formats and identifies the country and carrier. No API key required."
+---
+
+The local scanner is the foundation of every PhoneInfoga scan. It runs first, parses the input number statically, and produces the structured data that all other scanners rely on as their base input.
+
+<Note>
+  No configuration is required for this scanner. It runs automatically on every scan.
+</Note>
+
+## What it does
+
+The local scanner converts the raw phone number into several standard representations and identifies the associated country and carrier using offline lookup tables. It does not make any network requests.
+
+The fields it produces are:
+
+| Field | Description |
+|-------|-------------|
+| Raw local | The number without country code or formatting (e.g. `076418xxxx`) |
+| Local | The number in local format with spacing (e.g. `076 418 xx xx`) |
+| E164 | The number in E.164 format (e.g. `+4176418xxxx`) |
+| International | The E.164 number with the leading `+` stripped (e.g. `4176418xxxx`) |
+| Country | The ISO 3166-1 alpha-2 country code (e.g. `CH`) |
+| Carrier | The detected carrier name, if available |
+
+These values are passed to every other scanner as the basis for further analysis.
+
+## How to run
+
+```bash
+phoneinfoga scan -n +4176418xxxx
+```
+
+## Output example
+
+```shell
+Results for local
+Raw local: 076418xxxx
+Local: 076 418 xx xx
+E164: +4176418xxxx
+International: 4176418xxxx
+Country: CH
+```

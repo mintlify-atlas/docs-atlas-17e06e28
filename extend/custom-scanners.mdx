@@ -1,0 +1,164 @@
+---
+title: "Custom scanner plugins"
+description: "Build and load your own Go scanner plugins to extend PhoneInfoga with custom data sources."
+keywords: ["plugin", "scanner", "go plugin", "custom scanner", "extend"]
+---
+
+PhoneInfoga supports Go plugin files (`.so` shared libraries) loaded at runtime. You can write a scanner in Go, compile it as a plugin, and load it into PhoneInfoga without modifying the core binary.
+
+## The Scanner interface
+
+Every plugin must implement the `Scanner` interface from `github.com/sundowndev/phoneinfoga/v2/lib/remote`:
+
+```go
+type Scanner interface {
+    Name() string
+    Description() string
+    DryRun(number.Number, ScannerOptions) error
+    Run(number.Number, ScannerOptions) (interface{}, error)
+}
+```
+
+| Method | Description |
+|---|---|
+| `Name()` | A unique identifier for your scanner. Used as the key in scan output. |
+| `Description()` | A short human-readable description of what the scanner does. |
+| `DryRun()` | Called before `Run`. Return an error to skip the scanner for this number. |
+| `Run()` | Performs the actual scan. Returns a result value or an error. |
+
+### DryRun
+
+`DryRun` lets your scanner opt out of running for a given number before any network calls are made. Use it to check preconditions — for example, whether an API key is set, or whether your scanner supports the number's country code.
+
+If `DryRun` returns a non-nil error, the scanner is skipped silently and `Run` is never called.
+
+### Reading configuration with ScannerOptions
+
+`ScannerOptions` is a `map[string]interface{}`. Use `GetStringEnv(key)` to read a value from the options map, falling back to an environment variable if the key is not present:
+
+```go
+func (s *myScanner) DryRun(n number.Number, opts remote.ScannerOptions) error {
+    apiKey := opts.GetStringEnv("MY_API_KEY")
+    if apiKey == "" {
+        return fmt.Errorf("MY_API_KEY is not set")
+    }
+    return nil
+}
+```
+
+## Registering your plugin
+
+Call `remote.RegisterPlugin` inside an `init()` function. PhoneInfoga calls `init()` automatically when it loads the `.so` file:
+
+```go
+func init() {
+    remote.RegisterPlugin(&myScanner{})
+}
+```
+
+## Complete example
+
+The following is the full example plugin included in the PhoneInfoga repository:
+
+```go
+package main
+
+import (
+    "github.com/sundowndev/phoneinfoga/v2/lib/number"
+    "github.com/sundowndev/phoneinfoga/v2/lib/remote"
+)
+
+type customScanner struct{}
+
+type customScannerResponse struct {
+    Valid  bool   `json:"valid" console:"Valid"`
+    Info   string `json:"info" console:"Info"`
+    Hidden string `json:"-" console:"-"`
+}
+
+// Name returns the unique name this scanner.
+func (s *customScanner) Name() string {
+    return "customscanner"
+}
+
+// Description returns a short description for this scanner.
+func (s *customScanner) Description() string {
+    return "This is a dummy scanner"
+}
+
+// DryRun returns an error indicating whether
+// this scanner can be used with the given number.
+// This can be useful to check for authentication or
+// country code support for example, and avoid running
+// the scanner when it just can't work.
+func (s *customScanner) DryRun(n number.Number, opts remote.ScannerOptions) error {
+    return nil
+}
+
+// Run does the actual scan of the phone number.
+// Note this function will be executed in a goroutine.
+func (s *customScanner) Run(n number.Number, opts remote.ScannerOptions) (interface{}, error) {
+    data := customScannerResponse{
+        Valid:  true,
+        Info:   "This number is known for scams!",
+        Hidden: "This will not appear in the output",
+    }
+    return data, nil
+}
+
+func init() {
+    remote.RegisterPlugin(&customScanner{})
+}
+```
+
+Struct fields tagged with `json:"-"` and `console:"-"` are excluded from all output.
+
+## Building and loading a plugin
+
+<Steps>
+  <Step title="Write a Go file implementing the Scanner interface">
+    Create a Go source file (e.g. `customscanner.go`) with `package main`. Implement all four methods of the `Scanner` interface and call `remote.RegisterPlugin` in `init()`.
+  </Step>
+  <Step title="Build it as a shared library">
+    Compile the file using the `-buildmode=plugin` flag:
+
+    ```bash
+    go build -buildmode=plugin -o customscanner.so customscanner.go
+    ```
+
+    The output file extension depends on your OS. On Linux the result is `.so`.
+  </Step>
+  <Step title="Load it with the --plugin flag">
+    Pass the compiled plugin to PhoneInfoga using `--plugin`:
+
+    <CodeGroup>
+
+    ```bash scan command
+    phoneinfoga scan -n +4176418xxxx --plugin ./customscanner.so
+    ```
+
+    ```bash serve command
+    phoneinfoga serve --plugin ./customscanner.so
+    ```
+
+    </CodeGroup>
+
+    You can pass `--plugin` multiple times to load several plugins at once.
+  </Step>
+</Steps>
+
+After loading the plugin, the scan output includes a `customscanner` section:
+
+```text
+Results for customscanner
+Valid: true
+Info: This number is known for scams!
+```
+
+<Warning>
+Go plugins must be compiled with the same Go version, operating system, and CPU architecture as the PhoneInfoga binary. A plugin built on a different platform will fail to load.
+</Warning>
+
+<Note>
+Go plugins are only supported on Linux and macOS. Windows is not supported by the Go plugin system.
+</Note>
